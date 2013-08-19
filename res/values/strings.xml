@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SweetPi Control</string>
+    <string name="settings">Einstellungen</string>
+    <string name="default_url">http://192.168.1.2</string>
+</resources>
