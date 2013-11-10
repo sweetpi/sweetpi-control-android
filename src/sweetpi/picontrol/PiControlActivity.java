@@ -77,7 +77,6 @@ public class PiControlActivity extends Activity {
 	@Override
 	protected void onRestart() {
 		super.onRestart();
-		System.err.println("restart!!!!!!!!!!");
 	}
 	
 	

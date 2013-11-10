@@ -64,16 +64,16 @@ final public class PiWebViewClient extends WebViewClient {
 		super.onPageFinished(view, url);
 		dialog.dismiss();
 	}
+	
 
 	@Override
 	public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 		super.onReceivedError(view, errorCode, description, failingUrl);
+		
 		try {
+			//dismiss dialog if it exist
 			dialog.dismiss();
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
+		} catch (Exception e) {}
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this.piControlActivity);
 		alertDialogBuilder.setTitle("Fehler beim verbinden!");
@@ -83,6 +83,11 @@ final public class PiWebViewClient extends WebViewClient {
 				.setPositiveButton("Neu Laden", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						mainWebView.reload();
+					}
+				}).setNeutralButton("Einstellungen", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						Intent intent = new Intent(piControlActivity, SettingsActivity.class);
+						piControlActivity.startActivity(intent);
 					}
 				}).setNegativeButton("Beenden", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -102,7 +107,7 @@ final public class PiWebViewClient extends WebViewClient {
 	}
 
 	@Override
-	public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+	public void onReceivedHttpAuthRequest(WebView view, final HttpAuthHandler handler, String host, String realm) {
 		Log.d("WebAuth", "domain: " + host + " with realm: " + realm);
 
 		if (!handler.useHttpAuthUsernamePassword()) {
@@ -135,7 +140,8 @@ final public class PiWebViewClient extends WebViewClient {
 				else
 					System.err.println("Unknown protocol port: " + url.getProtocol());
 			}
-			if (host.equals(url.getHost() + ":" + port)) {
+
+			if (host.equals(url.getHost() + ":" + port) || host.equals(url.getHost()) ) {
 				final String user = settings.getString("basicAuthUser", "");
 				final String pw = settings.getString("basicAuthPW", "");
 				handler.proceed(user, pw);
@@ -144,15 +150,28 @@ final public class PiWebViewClient extends WebViewClient {
 				if (up != null && up.length == 2) {
 					handler.proceed(up[0], up[1]);
 				} else {
-					Log.d("WebAuth", "Could not find user/pass for domain :" + host + " with realm = " + realm);
-					final AlertDialog dialog = new AlertDialog.Builder(this.piControlActivity).create();
-					dialog.setMessage("Could not find user/pass for domain :" + host + " with realm = " + realm);
-
-					dialog.setButton(Dialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface di, int id) {
+					Log.d("WebAuth", "Could not find user/pass for domain: " + host + " with realm = " + realm);
+					final AlertDialog.Builder dialog = new AlertDialog.Builder(this.piControlActivity);
+					dialog.setMessage("Could not find user/pass for domain: " + host + " with realm = " + realm);
+					dialog.setPositiveButton("Neu versuchen", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
 							dialog.dismiss();
+							handler.cancel();
+							mainWebView.reload();
+						}
+					}).setNeutralButton("Einstellungen", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent intent = new Intent(piControlActivity, SettingsActivity.class);
+							piControlActivity.startActivity(intent);
+							dialog.dismiss();
+							handler.cancel();
+						}
+					}).setNegativeButton("Beenden", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							piControlActivity.finish();
 						}
 					});
+					
 					dialog.show();
 				}
 			}

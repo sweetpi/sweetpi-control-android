@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 
 import sweetpi.picontrol.PiControlActivity;
+import sweetpi.picontrol.SettingsActivity;
 
+import android.content.Intent;
 import android.webkit.WebView;
 import android.widget.Toast;
 
@@ -37,6 +39,11 @@ public class PiJavaScriptInterface {
 	
 	public void startVoiceRecognition(String callback) {
 		piControl.startVoiceRecognitionActivity(new JsVoiceActivityCallback(callback));
+	}
+	
+	public void showSettings() {
+		Intent intent = new Intent(piControl, SettingsActivity.class);
+		piControl.startActivity(intent);	
 	}
 
 }
