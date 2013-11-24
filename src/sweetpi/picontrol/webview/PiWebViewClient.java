@@ -244,13 +244,27 @@ final public class PiWebViewClient extends WebViewClient {
 				handler.proceed();
 			} else {
 				if (certDialog == null) {
-					certDialog = new AlertDialog.Builder(this.piControlActivity).create();
-					certDialog.setMessage("Untusted Certificate!");
-					certDialog.setButton(Dialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+					final AlertDialog.Builder certDialogB = new AlertDialog.Builder(this.piControlActivity);
+					certDialogB.setMessage("Untusted Certificate!");
+					
+					certDialogB.setPositiveButton("Neu versuchen", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							certDialog.dismiss();
+							dialog.dismiss();
+							mainWebView.reload();
+						}
+					}).setNeutralButton("Einstellungen", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent intent = new Intent(piControlActivity, SettingsActivity.class);
+							piControlActivity.startActivity(intent);
+							handler.cancel();
+						}
+					}).setNegativeButton("Beenden", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							piControlActivity.finish();
 						}
 					});
+					
+					certDialog = certDialogB.create();
 					certDialog.show();
 				}
 				handler.cancel();
