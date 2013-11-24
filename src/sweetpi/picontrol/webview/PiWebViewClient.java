@@ -69,7 +69,6 @@ final public class PiWebViewClient extends WebViewClient {
 	@Override
 	public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 		super.onReceivedError(view, errorCode, description, failingUrl);
-		
 		try {
 			//dismiss dialog if it exist
 			dialog.dismiss();
@@ -183,6 +182,7 @@ final public class PiWebViewClient extends WebViewClient {
 
 	@Override
 	public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+
 		if (error.getPrimaryError() == SslError.SSL_UNTRUSTED) {
 			SslCertificate cert = error.getCertificate();
 
@@ -190,15 +190,11 @@ final public class PiWebViewClient extends WebViewClient {
 
 			// Really really bad workaround to get X509Certificate
 			// from SSLError
-
 			Field privateField;
 			try {
 				privateField = SslCertificate.class.getDeclaredField("mX509Certificate");
 				privateField.setAccessible(true);
 				final X509Certificate mX509Certificate = (X509Certificate) privateField.get(cert);
-
-				// Log.d("WebAuth", ownCert.toString());
-				// Log.d("WebAuth", mX509Certificate.toString());
 
 				if (ownCert != null && ownCert.equals(mX509Certificate)) {
 					trust = true;
@@ -260,6 +256,16 @@ final public class PiWebViewClient extends WebViewClient {
 				handler.cancel();
 			}
 		} else {
+			if (certDialog == null) {
+				certDialog = new AlertDialog.Builder(this.piControlActivity).create();
+				certDialog.setMessage("SLL Certificate Error: " + error.getPrimaryError());
+				certDialog.setButton(Dialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						certDialog.dismiss();
+					}
+				});
+				certDialog.show();
+			}
 			handler.cancel();
 		}
 
