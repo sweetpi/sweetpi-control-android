@@ -14,12 +14,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 public class PiControlActivity extends Activity {
 	
@@ -29,6 +31,8 @@ public class PiControlActivity extends Activity {
 	private PiJavaScriptInterface.JsVoiceActivityCallback voiceCb;
 	private WebView mainWebView;
 	private SharedPreferences settings;
+
+	private boolean doubleBackToExitPressedOnce = false;
 
 	/** Called when the activity is first created. */
 	@SuppressLint("SetJavaScriptEnabled")
@@ -144,7 +148,26 @@ public class PiControlActivity extends Activity {
 		}
 	}
 	
-	
+	@Override
+	public void onBackPressed()
+	{
+	    if(mainWebView.canGoBack()) {
+	    	mainWebView.goBack();
+	    } else {
+	        if (doubleBackToExitPressedOnce ) {
+	            super.onBackPressed();
+	            return;
+	        }
+	        this.doubleBackToExitPressedOnce = true;
+	        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+	        new Handler().postDelayed(new Runnable() {
+	            @Override
+	            public void run() {
+	             doubleBackToExitPressedOnce=false;   
+	            }
+	        }, 2000);
+	    }
+	}
 	
 	
 	
